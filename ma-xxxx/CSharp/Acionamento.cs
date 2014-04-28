@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 
-namespace FTQ_Operação_240
+namespace Comm5
 {
     class Acionamento
     {
@@ -37,7 +36,7 @@ namespace FTQ_Operação_240
         }
 
         /*
-         * Lë o valor dos sensores no hardware e retorna um numero inteiro representando
+         * Lê o valor dos sensores no hardware e retorna um numero inteiro representando
          * todos os sensores lidos. Atualiza cache interno usado por isSensorActive
          */ 
         public int sensor()
