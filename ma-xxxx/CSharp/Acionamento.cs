@@ -39,7 +39,7 @@ namespace Comm5
          * Lê o valor dos sensores no hardware e retorna um numero inteiro representando
          * todos os sensores lidos. Atualiza cache interno usado por isSensorActive
          */ 
-        public int sensor()
+        public uint sensor()
         {
             socket.Send(System.Text.Encoding.ASCII.GetBytes("query\n"));
             
@@ -58,7 +58,7 @@ namespace Comm5
             string[] lines = buffer.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries);
 
             string lastUsableLine = null;
-            for ( int i = lines.Count() - 1; i >= 0; --i )
+            for (int i = lines.Length - 1; i >= 0; --i)
             {
                 if (lines[i].Contains("210") && !lines[i].Contains("OK") )
                 {
@@ -72,7 +72,7 @@ namespace Comm5
 
             string[] tokens = lastUsableLine.Split(' ');
             
-            lastSensorRead = Convert.ToInt32(tokens[1], 16);
+            lastSensorRead = Convert.ToUInt32(tokens[1], 16);
             return lastSensorRead;
         }
 
@@ -82,7 +82,12 @@ namespace Comm5
          */
         public bool isSensorActive( int sensor )
         {
-             return ((lastSensorRead & (1 << sensor)) != 0);
+            UInt32 bigEndianSensorRead = 0;
+            if (BitConverter.IsLittleEndian)
+                bigEndianSensorRead = ReverseBytes((uint)lastSensorRead);
+            else
+                bigEndianSensorRead = lastSensorRead;
+            return ((lastSensorRead & (1 << sensor)) != 0);
         }
 
         public void disconnect()
@@ -91,7 +96,13 @@ namespace Comm5
             socket.Disconnect(true);
         }
 
-        private int lastSensorRead = 0;
+        private static UInt32 ReverseBytes(UInt32 value)
+        {
+            return (value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 |
+                   (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24;
+        }
+
+        private uint lastSensorRead = 0;
         private Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
     }
